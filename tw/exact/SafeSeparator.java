@@ -4,8 +4,6 @@
 
 package tw.exact;
 
-import sun.font.TrueTypeFont;
-
 import java.io.File;
 
 import java.io.FileNotFoundException;

@@ -4,6 +4,8 @@
 
 package tw.exact;
 
+import sun.font.TrueTypeFont;
+
 import java.io.File;
 
 import java.io.FileNotFoundException;
@@ -40,10 +42,25 @@ public class SafeSeparator {
   
   public boolean isSafeSeparator(XBitSet separator, int maxSteps) {
     //  System.out.println("isSafeSeparator " + separator);
-    this.maxSteps = maxSteps;
-    steps = 0;
-    ArrayList<XBitSet> components = g.getComponents(separator);
-    if (components.size() == 1) {
+      if (System.getenv("nopreproc") != null) {
+          return false;
+      }
+      if (System.getenv("simplepreproc") != null) {
+          XBitSet vertices = separator;
+          for (int i: vertices.toArray()) {
+              for (int j: vertices.toArray()) {
+                  if (i == j)
+                      continue;
+                  if (!g.areAdjacent(i,j))
+                      return false;
+              }
+          }
+          return true;
+      }
+      this.maxSteps = maxSteps;
+      steps = 0;
+      ArrayList<XBitSet> components = g.getComponents(separator);
+      if (components.size() == 1) {
 //      System.err.println("non separator for safety testing:" + separator);
 //      throw new RuntimeException("non separator for safety testing:" + separator);
       return false;

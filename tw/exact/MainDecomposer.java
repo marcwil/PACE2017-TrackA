@@ -95,7 +95,9 @@ public class MainDecomposer {
             GreedyDecomposer mfd = new GreedyDecomposer(whole, mode);
 //      GreedyDecomposer mfd = new GreedyDecomposer(whole);
 
+            long startTime = System.currentTimeMillis();
             mfd.decompose();
+            long decompositionTime = System.currentTimeMillis() - startTime;
 
             log("greedy decomposition (" + mode + ") obtained with " +
                     whole.nestedBags.size() + " bags and width " +
@@ -106,6 +108,7 @@ public class MainDecomposer {
                         whole.width);
             }
 
+            startTime = System.currentTimeMillis();
             whole.detectSafeSeparators();
 
             if (System.getenv("debug") != null) {
@@ -124,7 +127,7 @@ public class MainDecomposer {
                     if (realclique)
                         clique_safe_seps += 1;
                 }
-                System.err.println(whole.countSafeSeparators() + " safe separators (including " + clique_safe_seps + "cliques) found in graph with n=" + g.n);
+                System.err.println(whole.countSafeSeparators() + " safe separators (including " + clique_safe_seps + " cliques) found in graph with n=" + g.n);
             }
 
             whole.validate();
@@ -133,11 +136,15 @@ public class MainDecomposer {
 
             whole.validate();
 
+            long packTime = System.currentTimeMillis() - startTime;
+
             if (System.getenv("debug") != null) {
                 System.err.println("the decomposition packed into " +
                         whole.nestedBags.size() + " bags, separatorWidth = " +
                         whole.separatorWidth + ", max bag size = " +
                         whole.maxNestedBagSize());
+                System.err.println("decompositionTime(ms) " + decompositionTime);
+                System.err.println("packtime(ms) " + packTime);
             }
             log("the decomposition packed into " +
                     whole.nestedBags.size() + " bags, separatorWidth = " +
@@ -158,23 +165,28 @@ public class MainDecomposer {
         if (System.getenv("debug") != null) {
             System.err.println("\n#####\nStarting IO Decomposition of " + g.n + " node component");
         }
+        long startTime = System.currentTimeMillis();
 
         for (Bag bag : best.nestedBags) {
             if (bag.getWidth() > lowestPossible) {
+                long singleIODecompositionStartTime = System.currentTimeMillis();
                 bag.makeRefinable();
-                if (System.getenv("debug") != null) {
-                    System.err.println("$$$$$$$$$ Calling IO Decomp on " + bag.graph.n + " node safely separated component.");
-                }
                 IODecomposer mtd = new IODecomposer(bag, g.minDegree(), g.n - 1);
                 mtd.decompose();
+                long singleIODecompositionTime = singleIODecompositionStartTime - System.currentTimeMillis();
+                if (System.getenv("debug") != null) {
+                    System.err.println("$$$$$$$$$ Calling IO Decomp on " + bag.graph.n +
+                        " node safely separated component. finnish time(ms) " + singleIODecompositionTime);
+                }
                 int w = bag.getWidth();
                 if (w > lowestPossible) {
                     lowestPossible = w;
                 }
             }
         }
+        long totalIODecompositionTime = System.currentTimeMillis() - startTime;
         if (System.getenv("debug") != null) {
-            System.err.println("Finished IO Decomposition of " + g.n + " node component\n#####\n");
+            System.err.println("Finished IO Decomposition of " + g.n + " node component in time(ms) " + totalIODecompositionTime + "\n#####\n");
         }
 
         log("flattening");
@@ -197,7 +209,12 @@ public class MainDecomposer {
 
     public static void main(String[] args) {
         Graph g = Graph.readGraph(System.in);
+        long startTime = System.currentTimeMillis();
         TreeDecomposition td = decompose(g);
+        long totalTime = startTime - System.currentTimeMillis();
+        if (System.getenv("debug") != null) {
+            System.err.println("Total elapsed time(ms) " + totalTime);
+        }
         td.writeTo(System.out);
     }
 }

@@ -173,7 +173,7 @@ public class MainDecomposer {
                 bag.makeRefinable();
                 IODecomposer mtd = new IODecomposer(bag, g.minDegree(), g.n - 1);
                 mtd.decompose();
-                long singleIODecompositionTime = singleIODecompositionStartTime - System.currentTimeMillis();
+                long singleIODecompositionTime = System.currentTimeMillis() - singleIODecompositionStartTime;
                 if (System.getenv("debug") != null) {
                     System.err.println("$$$$$$$$$ Calling IO Decomp on " + bag.graph.n +
                         " node safely separated component. finnish time(ms) " + singleIODecompositionTime);
@@ -211,7 +211,7 @@ public class MainDecomposer {
         Graph g = Graph.readGraph(System.in);
         long startTime = System.currentTimeMillis();
         TreeDecomposition td = decompose(g);
-        long totalTime = startTime - System.currentTimeMillis();
+        long totalTime = System.currentTimeMillis() - startTime;
         if (System.getenv("debug") != null) {
             System.err.println("Total elapsed time(ms) " + totalTime);
         }

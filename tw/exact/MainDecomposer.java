@@ -159,8 +159,15 @@ public class MainDecomposer {
 //    best = whole;
 
         //    whole.dump();
+        //best.dump();
 
         int lowestPossible = best.separatorWidth;
+        if (System.getenv("lowerBound") != null) {
+            int previousLowest = Integer.parseInt(System.getenv("lowerBound"));
+            if (previousLowest < lowestPossible) {
+                lowestPossible = previousLowest;
+            }
+        }
 
         if (System.getenv("debug") != null) {
             System.err.println("\n#####\nStarting IO Decomposition of " + g.n + " node component");
@@ -171,6 +178,10 @@ public class MainDecomposer {
             if (bag.getWidth() > lowestPossible) {
                 long singleIODecompositionStartTime = System.currentTimeMillis();
                 bag.makeRefinable();
+                if (System.getenv("writesubinstances") != null) {
+                    writeGraph(bag.graph);
+                    continue;
+                }
                 IODecomposer mtd = new IODecomposer(bag, g.minDegree(), g.n - 1);
                 mtd.decompose();
                 long singleIODecompositionTime = System.currentTimeMillis() - singleIODecompositionStartTime;
@@ -205,6 +216,12 @@ public class MainDecomposer {
         if (VERBOSE) {
             System.out.println(message);
         }
+    }
+
+    static void writeGraph(Graph graph) {
+        System.err.println("$#$# IO SUBINSTANCE START");
+        graph.writeTo(System.err);
+        System.err.println("$#$# IO SUBINSTANCE END");
     }
 
     public static void main(String[] args) {
